@@ -1,0 +1,91 @@
+.navbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 20px;
+  background-color: white;
+  color: black;
+  border-bottom: 5px solid black;
+}
+
+.brand {
+  font-size: 2rem;
+  text-decoration: none;
+}
+
+.links ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.links li {
+  display: inline-block;
+  margin-right: 20px;
+}
+
+.links li:last-child {
+  margin-right: 0;
+}
+
+.links a {
+  color: black;
+  text-decoration: none;
+  padding: 10px 20px;
+  border-radius: 10px;
+  border: 3px solid black;
+  font-size: 18px;
+  transition:
+    background-color 0.3s ease,
+    transform 0.3s ease;
+}
+
+.links a:hover {
+  background-color: #ccc;
+}
+
+.auth-buttons a {
+  text-decoration: none;
+  color: white;
+  background-color: black;
+  padding: 10px 20px;
+  border-radius: 10px;
+  border: 2px solid black;
+  font-size: 18px;
+  margin: 0.5rem;
+  transition:
+    background-color 0.3s ease,
+    transform 0.3s ease;
+}
+
+.auth-buttons a:hover {
+  background-color: #ccc;
+  color: black;
+}
+
+.auth-buttons a:active {
+  transform: scale(0.95);
+}
+
+.auth-buttons button {
+  text-decoration: none;
+  color: white;
+  background-color: black;
+  padding: 10px 20px;
+  border-radius: 10px;
+  border: 2px solid black;
+  font-size: 18px;
+  margin: 0.5rem;
+  transition:
+    background-color 0.3s ease,
+    transform 0.3s ease;
+}
+
+.auth-buttons button:hover {
+  background-color: #ccc;
+  color: black;
+}
+
+.auth-buttons button:active {
+  transform: scale(0.95);
+}
