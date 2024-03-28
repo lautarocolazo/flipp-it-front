@@ -4,9 +4,10 @@ import PropTypes from "prop-types";
 import { Home } from "./pages/Home";
 import { Login } from "./pages/Login";
 import { SignUp } from "./pages/Signup";
-import { Create } from "./pages/Create";
-import { Study } from "./pages/Study";
-import { Stats } from "./pages/Stats";
+import Create from "./pages/Create";
+import  Study  from "./pages/Study";
+import  Stats  from "./pages/Stats";
+import Library from "./pages/Library";
 import "./styles/navbar.css";
 import "./styles/signup.css";
 
