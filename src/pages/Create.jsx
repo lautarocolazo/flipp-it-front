@@ -1,16 +1,20 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import "../styles/Create.css";
 import FolderImg from "../images/folder.png";
 import DeckImg from "../images/paper-stack.png";
 import CardImg from "../images/flash-cards.png";
-import { useNavigate } from 'react-router-dom'; // Import the useNavigate hook
+import { useNavigate } from "react-router-dom"; // Import the useNavigate hook
 
 const Create = ({ selectedItems, updateSelectedItems }) => {
-  const [newItem, setNewItem] = useState({ type: '', title: '', description: '' });
+  const [newItem, setNewItem] = useState({
+    type: "",
+    title: "",
+    description: "",
+  });
   const navigate = useNavigate(); // Initialize the useNavigate hook
 
   useEffect(() => {
-    setNewItem({ type: '', title: '', description: '' });
+    setNewItem({ type: "", title: "", description: "" });
   }, [selectedItems]);
 
   const handleOptionClick = (option) => {
@@ -21,9 +25,9 @@ const Create = ({ selectedItems, updateSelectedItems }) => {
   };
 
   const handleEditItem = (item) => {
-    if (item.type === 'deck') {
+    if (item.type === "deck") {
       // Use the navigate function to navigate to the EditPage with the item information
-      navigate('/edit', { state: { item } });
+      navigate("/edit", { state: { item } });
     } else {
       console.log(`Editing ${item.type}`);
     }
@@ -34,19 +38,25 @@ const Create = ({ selectedItems, updateSelectedItems }) => {
   };
 
   const handleDeleteItem = (item) => {
-    const updatedItems = selectedItems.filter((selectedItem) => selectedItem !== item);
+    const updatedItems = selectedItems.filter(
+      (selectedItem) => selectedItem !== item,
+    );
     // Call the prop function from Layout to update selectedItems
     updateSelectedItems(updatedItems);
   };
 
   const renderLibraryContent = () => {
+    if (!selectedItems || selectedItems.length === 0) {
+      return <div>No items selected</div>;
+    }
+
     return selectedItems.map((item, index) => (
-      <div key={`${item.type}-${index}`} className={styles.libraryItem}>
+      <div key={`${item.type}-${index}`} className="libraryItem">
         <h2>{`${item.type.charAt(0).toUpperCase() + item.type.slice(1)}`}</h2>
         {renderLibraryImage(item.type)}
-        <div className={styles.itemOptions}>
-          <span onClick={() => handleEditItem(item)}>Edit  </span>
-          <span onClick={() => handleShareItem(item)}>Share  </span>
+        <div className="itemOptions">
+          <span onClick={() => handleEditItem(item)}>Edit </span>
+          <span onClick={() => handleShareItem(item)}>Share </span>
           <span onClick={() => handleDeleteItem(item)}>Delete</span>
         </div>
       </div>
@@ -77,35 +87,26 @@ const Create = ({ selectedItems, updateSelectedItems }) => {
   };
 
   return (
-    <div className={styles.createPage}>
-      <div className={`${styles.box} ${styles.createBox}`}>
+    <div className="createPage">
+      <div className="box createBox">
         <h1>Create</h1>
-        <div className={styles.optionsContainer}>
-          <div
-            className={styles.option}
-            onClick={() => handleOptionClick("folder")}
-          >
+        <div className="optionsContainer">
+          <div className="option" onClick={() => handleOptionClick("folder")}>
             <img src={FolderImg} alt="Create Folder" style={{ width: 50 }} />
             <span>Folder</span>
           </div>
-          <div
-            className={styles.option}
-            onClick={() => handleOptionClick("deck")}
-          >
+          <div className="option" onClick={() => handleOptionClick("deck")}>
             <img src={DeckImg} alt="Create Deck" style={{ width: 50 }} />
             <span>Deck</span>
           </div>
-          <div
-            className={styles.option}
-            onClick={() => handleOptionClick("card")}
-          >
+          <div className="option" onClick={() => handleOptionClick("card")}>
             <img src={CardImg} alt="Create Card" style={{ width: 50 }} />
             <span>Card</span>
           </div>
         </div>
       </div>
 
-      <div className={`${styles.box} ${styles.libraryBox}`}>
+      <div className="box libraryBox">
         <h1>Library</h1>
         {renderLibraryContent()}
       </div>
