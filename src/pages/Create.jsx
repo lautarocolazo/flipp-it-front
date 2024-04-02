@@ -1,115 +1,117 @@
-import { useState, useEffect } from "react";
-import "../styles/Create.css";
+import { useEffect, useState } from "react";
+import "../styles/create.css";
 import FolderImg from "../images/folder.png";
 import DeckImg from "../images/paper-stack.png";
 import CardImg from "../images/flash-cards.png";
-import { useNavigate } from "react-router-dom"; // Import the useNavigate hook
+import ModalCreateFolder from "../components/ModalCreateFolder"; // Import the modal component
 
-const Create = ({ selectedItems, updateSelectedItems }) => {
-  const [newItem, setNewItem] = useState({
-    type: "",
-    title: "",
-    description: "",
-  });
-  const navigate = useNavigate(); // Initialize the useNavigate hook
+export const Create = () => {
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [folders, setFolders] = useState([]);
+
+  const openModal = () => {
+    setIsModalOpen(true);
+  };
+
+  const closeModal = () => {
+    setIsModalOpen(false);
+  };
+
+  const handleCreateFolder = async (folderName) => {
+    const token = localStorage.getItem("token");
+
+    if (!token) {
+      console.error("Token not found");
+      // Handle case where token is not available
+      return;
+    }
+
+    try {
+      const tokenPayload = JSON.parse(atob(token.split(".")[1])); // Decode JWT payload
+      const userId = tokenPayload.userId; // Extract userId from JWT payload
+
+      const response = await fetch("http://localhost:8080/api/folders", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          name: folderName,
+          userId: userId,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to create folder");
+      }
+
+      console.log("Folder created successfully");
+      // Close the modal after submitting
+      closeModal();
+      // Refresh folders after creating a new one
+      fetchFolders();
+    } catch (error) {
+      console.error("Error creating folder:", error);
+      // Handle error
+    }
+  };
+
+  const fetchFolders = async () => {
+    try {
+      const response = await fetch("http://localhost:8080/api/folders");
+      if (!response.ok) {
+        throw new Error("Failed to fetch folders");
+      }
+      const foldersData = await response.json();
+      setFolders(foldersData);
+    } catch (error) {
+      console.error("Error fetching folders:", error);
+    }
+  };
 
   useEffect(() => {
-    setNewItem({ type: "", title: "", description: "" });
-  }, [selectedItems]);
-
-  const handleOptionClick = (option) => {
-    const newItem = {
-      type: option,
-    };
-    updateSelectedItems([...selectedItems, newItem]);
-  };
-
-  const handleEditItem = (item) => {
-    if (item.type === "deck") {
-      // Use the navigate function to navigate to the EditPage with the item information
-      navigate("/edit", { state: { item } });
-    } else {
-      console.log(`Editing ${item.type}`);
-    }
-  };
-
-  const handleShareItem = (item) => {
-    console.log(`Sharing ${item.type}`);
-  };
-
-  const handleDeleteItem = (item) => {
-    const updatedItems = selectedItems.filter(
-      (selectedItem) => selectedItem !== item,
-    );
-    // Call the prop function from Layout to update selectedItems
-    updateSelectedItems(updatedItems);
-  };
-
-  const renderLibraryContent = () => {
-    if (!selectedItems || selectedItems.length === 0) {
-      return <div>No items selected</div>;
-    }
-
-    return selectedItems.map((item, index) => (
-      <div key={`${item.type}-${index}`} className="libraryItem">
-        <h2>{`${item.type.charAt(0).toUpperCase() + item.type.slice(1)}`}</h2>
-        {renderLibraryImage(item.type)}
-        <div className="itemOptions">
-          <span onClick={() => handleEditItem(item)}>Edit </span>
-          <span onClick={() => handleShareItem(item)}>Share </span>
-          <span onClick={() => handleDeleteItem(item)}>Delete</span>
-        </div>
-      </div>
-    ));
-  };
-
-  const renderLibraryImage = (option) => {
-    switch (option) {
-      case "folder":
-        return (
-          <img
-            src={FolderImg}
-            alt={`Library ${option}`}
-            style={{ width: 100 }}
-          />
-        );
-      case "deck":
-        return (
-          <img src={DeckImg} alt={`Library ${option}`} style={{ width: 100 }} />
-        );
-      case "card":
-        return (
-          <img src={CardImg} alt={`Library ${option}`} style={{ width: 100 }} />
-        );
-      default:
-        return null;
-    }
-  };
+    fetchFolders();
+  }, []);
 
   return (
-    <div className="createPage">
-      <div className="box createBox">
-        <h1>Create</h1>
-        <div className="optionsContainer">
-          <div className="option" onClick={() => handleOptionClick("folder")}>
-            <img src={FolderImg} alt="Create Folder" style={{ width: 50 }} />
-            <span>Folder</span>
-          </div>
-          <div className="option" onClick={() => handleOptionClick("deck")}>
-            <img src={DeckImg} alt="Create Deck" style={{ width: 50 }} />
-            <span>Deck</span>
-          </div>
-          <div className="option" onClick={() => handleOptionClick("card")}>
-            <img src={CardImg} alt="Create Card" style={{ width: 50 }} />
-            <span>Card</span>
+    <div className="container-create">
+      <>
+        <div className="create">
+          <h2 className="title-header-create">Create</h2>
+          <div className="create-options">
+            <div className="create-option" onClick={openModal}>
+              <img src={FolderImg} alt="Folder" className="create-image" />
+              <p>Folder</p>
+            </div>
+            <div className="create-option">
+              <img src={DeckImg} alt="Deck" className="create-image" />
+              <p>Deck</p>
+            </div>
+            <div className="create-option">
+              <img src={CardImg} alt="Card" className="create-image" />
+              <p>Card</p>
+            </div>
           </div>
         </div>
-      </div>
-
-      <div className="box libraryBox">
-        <h1>Library</h1>
-        {renderLibraryContent()}
-      </div>
+        <div className="library-create">
+          <h2 className="title-header-create">Library</h2>
+          <div className="folders-container">
+            {folders.map((folder) => (
+              <div key={folder.id} className="folder-item">
+                <img src={FolderImg} alt="Folder" className="folder-image" />
+                <p className="folder-name">{folder.name}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </>
+      {/* Render the modal */}
+      <ModalCreateFolder
+        isOpen={isModalOpen}
+        onClose={closeModal}
+        onSubmit={handleCreateFolder}
+      />
     </div>
   );
 };
