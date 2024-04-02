@@ -3,11 +3,18 @@ import "../styles/create.css";
 import FolderImg from "../images/folder.png";
 import DeckImg from "../images/paper-stack.png";
 import CardImg from "../images/flash-cards.png";
-import ModalCreateFolder from "../components/ModalCreateFolder"; // Import the modal component
+import ModalCreateFolder from "../components/ModalCreateFolder";
 
 export const Create = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [folders, setFolders] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+  console.log("Initial value of folders:", folders);
+
+  useEffect(() => {
+    console.log("isLoading:", isLoading);
+    console.log("folders length:", folders.length);
+  }, [isLoading, folders]);
 
   const openModal = () => {
     setIsModalOpen(true);
@@ -22,13 +29,12 @@ export const Create = () => {
 
     if (!token) {
       console.error("Token not found");
-      // Handle case where token is not available
       return;
     }
 
     try {
-      const tokenPayload = JSON.parse(atob(token.split(".")[1])); // Decode JWT payload
-      const userId = tokenPayload.userId; // Extract userId from JWT payload
+      const tokenPayload = JSON.parse(atob(token.split(".")[1]));
+      const userId = tokenPayload.userId;
 
       const response = await fetch("http://localhost:8080/api/folders", {
         method: "POST",
@@ -47,13 +53,10 @@ export const Create = () => {
       }
 
       console.log("Folder created successfully");
-      // Close the modal after submitting
       closeModal();
-      // Refresh folders after creating a new one
       fetchFolders();
     } catch (error) {
       console.error("Error creating folder:", error);
-      // Handle error
     }
   };
 
@@ -67,12 +70,36 @@ export const Create = () => {
       setFolders(foldersData);
     } catch (error) {
       console.error("Error fetching folders:", error);
+    } finally {
+      setIsLoading(false);
     }
   };
 
   useEffect(() => {
     fetchFolders();
   }, []);
+
+  const handleDeleteFolder = async (folderId) => {
+    const confirmed = window.confirm(
+      "Are you sure you want to delete this folder?",
+    );
+    if (!confirmed) return;
+
+    try {
+      const response = await fetch(
+        `http://localhost:8080/api/folders/${folderId}`,
+        {
+          method: "DELETE",
+        },
+      );
+      if (!response.ok) {
+        throw new Error("Failed to delete folder");
+      }
+      fetchFolders();
+    } catch (error) {
+      console.error("Error deleting folder:", error);
+    }
+  };
 
   return (
     <div className="container-create">
@@ -96,17 +123,28 @@ export const Create = () => {
         </div>
         <div className="library-create">
           <h2 className="title-header-create">Library</h2>
-          <div className="folders-container">
-            {folders.map((folder) => (
-              <div key={folder.id} className="folder-item">
-                <img src={FolderImg} alt="Folder" className="folder-image" />
-                <p className="folder-name">{folder.name}</p>
-              </div>
-            ))}
-          </div>
+          {isLoading ? (
+            <p>Loading...</p>
+          ) : folders.length === 0 ? (
+            <p className="no-folders-message">No folders created yet.</p>
+          ) : (
+            <div className="folders-container">
+              {folders.map((folder) => (
+                <div key={folder.id} className="folder-item">
+                  <img src={FolderImg} alt="Folder" className="folder-image" />
+                  <p className="folder-name">{folder.name}</p>
+                  <span
+                    className="delete-folder"
+                    onClick={() => handleDeleteFolder(folder.id)}
+                  >
+                    ❌
+                  </span>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
       </>
-      {/* Render the modal */}
       <ModalCreateFolder
         isOpen={isModalOpen}
         onClose={closeModal}
