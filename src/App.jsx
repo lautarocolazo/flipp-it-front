@@ -7,7 +7,6 @@ import { SignUp } from "./pages/Signup";
 import Create from "./pages/Create";
 import Study from "./pages/Study";
 import Stats from "./pages/Stats";
-import Library from "./pages/Library";
 import "./styles/navbar.css";
 import "./styles/signup.css";
 

@@ -28,7 +28,6 @@ const ModalFolderDecks = ({ isOpen, folderId, onClose }) => {
     }
   }, [isOpen, folderId]);
 
-  // Reset decks and isLoading when the modal is closed
   useEffect(() => {
     if (!isOpen) {
       setDecks([]);

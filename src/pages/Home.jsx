@@ -2,12 +2,12 @@ import PropTypes from "prop-types";
 import { useState, useEffect } from "react";
 import FolderItem from "../components/FolderItem";
 import ModalFolderDecks from "../components/ModalFolderDecks";
-import FlashcardItem from "../components/FlashcardItem"; // Import the FlashcardItem component
+import FlashcardItem from "../components/FlashcardItem";
 import "../styles/home.css";
 
 export const Home = ({ isLoggedIn }) => {
   const [folders, setFolders] = useState([]);
-  const [flashcards, setFlashcards] = useState([]); // State variable to store flashcards
+  const [flashcards, setFlashcards] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [selectedFolderId, setSelectedFolderId] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -106,7 +106,6 @@ export const Home = ({ isLoggedIn }) => {
           </div>
           <div className="study">
             <h2 className="title-header">Today's Study</h2>
-            {/* Render the flashcards */}
             {flashcards.map((flashcard) => (
               <FlashcardItem key={flashcard.id} flashcard={flashcard} />
             ))}
