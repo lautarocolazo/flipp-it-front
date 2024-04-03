@@ -5,11 +5,14 @@ import DeckImg from "../images/paper-stack.png";
 import CardImg from "../images/flash-cards.png";
 import ModalCreateFolder from "../components/ModalCreateFolder";
 import ModalCreateDeck from "../components/ModalCreateDeck";
+import ModalCreateFlashcard from "../components/ModalCreateFlashcard";
 
 export const Create = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isDeckModalOpen, setIsDeckModalOpen] = useState(false);
+  const [isFlashcardModalOpen, setIsFlashcardModalOpen] = useState(false);
   const [folders, setFolders] = useState([]);
+  const [decks, setDecks] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
 
   console.log("Initial value of folders:", folders);
@@ -19,21 +22,12 @@ export const Create = () => {
     console.log("folders length:", folders.length);
   }, [isLoading, folders]);
 
-  const openModal = () => {
-    setIsModalOpen(true);
-  };
-
-  const openDeckModal = () => {
-    setIsDeckModalOpen(true);
-  };
-
-  const closeModal = () => {
-    setIsModalOpen(false);
-  };
-
-  const closeDeckModal = () => {
-    setIsDeckModalOpen(false);
-  };
+  const openModal = () => setIsModalOpen(true);
+  const openDeckModal = () => setIsDeckModalOpen(true);
+  const openFlashcardModal = () => setIsFlashcardModalOpen(true);
+  const closeModal = () => setIsModalOpen(false);
+  const closeDeckModal = () => setIsDeckModalOpen(false);
+  const closeFlashcardModal = () => setIsFlashcardModalOpen(false);
 
   const handleCreateFolder = async (folderName) => {
     const token = localStorage.getItem("token");
@@ -98,8 +92,36 @@ export const Create = () => {
     }
   };
 
+  const fetchDecks = async () => {
+    const token = localStorage.getItem("token");
+
+    if (!token) {
+      console.error("Token not found");
+      return;
+    }
+
+    try {
+      const tokenPayload = JSON.parse(atob(token.split(".")[1]));
+      const userId = tokenPayload.userId;
+
+      const response = await fetch(
+        `http://localhost:8080/api/decks/users/${userId}`,
+      );
+      if (!response.ok) {
+        throw new Error("Failed to fetch folders");
+      }
+      const decks = await response.json();
+      setDecks(decks);
+    } catch (error) {
+      console.error("Error fetching folders:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   useEffect(() => {
     fetchFolders();
+    fetchDecks();
   }, []);
 
   const handleDeleteFolder = async (folderId) => {
@@ -159,6 +181,41 @@ export const Create = () => {
     }
   };
 
+  const handleCreateFlashcard = async (flashcardData) => {
+    const token = localStorage.getItem("token");
+
+    if (!token) {
+      console.error("Token not found");
+      return;
+    }
+
+    try {
+      const tokenPayload = JSON.parse(atob(token.split(".")[1]));
+      const userId = tokenPayload.userId;
+
+      const response = await fetch("http://localhost:8080/api/flashcards", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          ...flashcardData,
+          userId: userId,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to create flashcard");
+      }
+
+      console.log("Flashcard created successfully");
+      closeFlashcardModal();
+    } catch (error) {
+      console.error("Error creating flashcard:", error);
+    }
+  };
+
   return (
     <div className="container-create">
       <>
@@ -173,7 +230,7 @@ export const Create = () => {
               <img src={DeckImg} alt="Deck" className="create-image" />
               <p>Deck</p>
             </div>
-            <div className="create-option">
+            <div className="create-option" onClick={openFlashcardModal}>
               <img src={CardImg} alt="Card" className="create-image" />
               <p>Card</p>
             </div>
@@ -212,7 +269,14 @@ export const Create = () => {
         isOpen={isDeckModalOpen}
         onClose={closeDeckModal}
         onSubmit={handleCreateDeck}
-        folders={folders} // Pass folders data to the deck modal
+        folders={folders}
+      />
+
+      <ModalCreateFlashcard
+        isOpen={isFlashcardModalOpen}
+        onClose={closeFlashcardModal}
+        onSubmit={handleCreateFlashcard}
+        decks={decks}
       />
     </div>
   );
