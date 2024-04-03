@@ -1,4 +1,4 @@
-import "../styles/flashcard-item.css"; // Import the CSS file with the styles
+import "../styles/flashcard-item.css";
 
 const FlashcardItem = ({ flashcard }) => {
   const createdDate = new Date(flashcard.createdAt);

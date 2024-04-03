@@ -15,14 +15,25 @@ export const Home = ({ isLoggedIn }) => {
   useEffect(() => {
     const fetchFolders = async () => {
       try {
-        const response = await fetch("http://localhost:8080/api/folders");
-        if (!response.ok) {
-          throw new Error("Failed to fetch folders");
+        const token = localStorage.getItem("token");
+        if (!token) {
+          throw new Error("Token not found");
         }
-        const foldersData = await response.json();
-        setFolders(foldersData);
+
+        const tokenPayload = JSON.parse(atob(token.split(".")[1]));
+        const userId = tokenPayload.userId;
+
+        const response = await fetch(
+          `http://localhost:8080/api/folders/users/${userId}`,
+        );
+        if (!response.ok) {
+          throw new Error("Failed to fetch flashcards");
+        }
+
+        const folders = await response.json();
+        setFolders(folders);
       } catch (error) {
-        console.error("Error fetching folders:", error);
+        console.error("Error fetching flashcards:", error);
       } finally {
         setIsLoading(false);
       }
