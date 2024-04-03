@@ -2,10 +2,12 @@ import PropTypes from "prop-types";
 import { useState, useEffect } from "react";
 import FolderItem from "../components/FolderItem";
 import ModalFolderDecks from "../components/ModalFolderDecks";
+import FlashcardItem from "../components/FlashcardItem"; // Import the FlashcardItem component
 import "../styles/home.css";
 
 export const Home = ({ isLoggedIn }) => {
   const [folders, setFolders] = useState([]);
+  const [flashcards, setFlashcards] = useState([]); // State variable to store flashcards
   const [isLoading, setIsLoading] = useState(true);
   const [selectedFolderId, setSelectedFolderId] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -28,6 +30,38 @@ export const Home = ({ isLoggedIn }) => {
 
     fetchFolders();
   }, []);
+
+  useEffect(() => {
+    const fetchFlashcards = async () => {
+      try {
+        const token = localStorage.getItem("token");
+        if (!token) {
+          throw new Error("Token not found");
+        }
+
+        const tokenPayload = JSON.parse(atob(token.split(".")[1]));
+        const userId = tokenPayload.userId;
+
+        const response = await fetch(
+          `http://localhost:8080/api/flashcards/users/${userId}`,
+        );
+        if (!response.ok) {
+          throw new Error("Failed to fetch flashcards");
+        }
+
+        const flashcardsData = await response.json();
+        setFlashcards(flashcardsData);
+      } catch (error) {
+        console.error("Error fetching flashcards:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    if (isLoggedIn) {
+      fetchFlashcards();
+    }
+  }, [isLoggedIn]);
 
   const handleFolderClick = (folderId) => {
     setSelectedFolderId(folderId);
@@ -61,6 +95,10 @@ export const Home = ({ isLoggedIn }) => {
           </div>
           <div className="study">
             <h2 className="title-header">Today's Study</h2>
+            {/* Render the flashcards */}
+            {flashcards.map((flashcard) => (
+              <FlashcardItem key={flashcard.id} flashcard={flashcard} />
+            ))}
           </div>
           <div className="reminder">
             <h2 className="title-header">Reminders</h2>
