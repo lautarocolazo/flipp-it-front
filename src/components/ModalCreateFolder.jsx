@@ -1,5 +1,5 @@
 import { useState } from "react";
-import "../styles/modal-create-folder.css"; // Import the modal CSS
+import "../styles/modal-create-folder.css";
 
 const ModalCreateFolder = ({ isOpen, onClose, onSubmit }) => {
   const [folderName, setFolderName] = useState("");
@@ -17,7 +17,7 @@ const ModalCreateFolder = ({ isOpen, onClose, onSubmit }) => {
     <>
       {isOpen && (
         <>
-          <div className="modal-overlay"></div> {/* Semi-transparent overlay */}
+          <div className="modal-overlay"></div>
           <div className="modal">
             <div className="modal-content">
               <h2>Create Folder</h2>
@@ -26,7 +26,7 @@ const ModalCreateFolder = ({ isOpen, onClose, onSubmit }) => {
                 placeholder="Folder Name"
                 value={folderName}
                 onChange={handleInputChange}
-                className="input" // Apply input styling
+                className="input"
               />
               <button onClick={handleSubmit} className="button">
                 Create

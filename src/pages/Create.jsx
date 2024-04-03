@@ -4,11 +4,14 @@ import FolderImg from "../images/folder.png";
 import DeckImg from "../images/paper-stack.png";
 import CardImg from "../images/flash-cards.png";
 import ModalCreateFolder from "../components/ModalCreateFolder";
+import ModalCreateDeck from "../components/ModalCreateDeck";
 
 export const Create = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isDeckModalOpen, setIsDeckModalOpen] = useState(false);
   const [folders, setFolders] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
+
   console.log("Initial value of folders:", folders);
 
   useEffect(() => {
@@ -20,8 +23,16 @@ export const Create = () => {
     setIsModalOpen(true);
   };
 
+  const openDeckModal = () => {
+    setIsDeckModalOpen(true);
+  };
+
   const closeModal = () => {
     setIsModalOpen(false);
+  };
+
+  const closeDeckModal = () => {
+    setIsDeckModalOpen(false);
   };
 
   const handleCreateFolder = async (folderName) => {
@@ -61,8 +72,20 @@ export const Create = () => {
   };
 
   const fetchFolders = async () => {
+    const token = localStorage.getItem("token");
+
+    if (!token) {
+      console.error("Token not found");
+      return;
+    }
+
     try {
-      const response = await fetch("http://localhost:8080/api/folders");
+      const tokenPayload = JSON.parse(atob(token.split(".")[1]));
+      const userId = tokenPayload.userId;
+
+      const response = await fetch(
+        `http://localhost:8080/api/folders/users/${userId}`,
+      );
       if (!response.ok) {
         throw new Error("Failed to fetch folders");
       }
@@ -101,6 +124,41 @@ export const Create = () => {
     }
   };
 
+  const handleCreateDeck = async (deckData) => {
+    const token = localStorage.getItem("token");
+
+    if (!token) {
+      console.error("Token not found");
+      return;
+    }
+
+    try {
+      const tokenPayload = JSON.parse(atob(token.split(".")[1]));
+      const userId = tokenPayload.userId;
+
+      const response = await fetch("http://localhost:8080/api/decks", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          ...deckData,
+          userId: userId,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to create deck");
+      }
+
+      console.log("Deck created successfully");
+      closeDeckModal();
+    } catch (error) {
+      console.error("Error creating deck:", error);
+    }
+  };
+
   return (
     <div className="container-create">
       <>
@@ -111,7 +169,7 @@ export const Create = () => {
               <img src={FolderImg} alt="Folder" className="create-image" />
               <p>Folder</p>
             </div>
-            <div className="create-option">
+            <div className="create-option" onClick={openDeckModal}>
               <img src={DeckImg} alt="Deck" className="create-image" />
               <p>Deck</p>
             </div>
@@ -149,6 +207,12 @@ export const Create = () => {
         isOpen={isModalOpen}
         onClose={closeModal}
         onSubmit={handleCreateFolder}
+      />
+      <ModalCreateDeck
+        isOpen={isDeckModalOpen}
+        onClose={closeDeckModal}
+        onSubmit={handleCreateDeck}
+        folders={folders} // Pass folders data to the deck modal
       />
     </div>
   );
